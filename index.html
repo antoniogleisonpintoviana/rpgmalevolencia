@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>RPG</title>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      background-color: #1e1e1e;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      border: 2px solid #0566B1;
+      background-color: #ffffff;
+    }
+    h1 {
+      color: white;
+      position: absolute;
+      top: 10px;
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h1>RPG</h1>
+
+  <script>
+    class Guerreiro extends Phaser.Scene {
+      constructor() {
+        super({ key: 'Guerreiro' });
+      }
+
+      preload() {
+        this.load.image('bg', 'bg1.png'); // Carrega a imagem de fundo
+        this.load.image('guerreiro', 'guerreiro.png');
+        this.load.image('guerreiro2', 'guerreiro2.png');
+        this.load.image('clerigo', 'clerigo.png');
+        this.load.image('clerigo2', 'clerigo2.png');
+        this.load.image('bardo', 'bardo.png'); // Carrega o sprite do bardo
+      }
+
+      create() {
+        // Adiciona a imagem de fundo
+        this.add.image(400, 300, 'bg').setOrigin(0.5, 0.5).setDisplaySize(800, 600); // Ajusta a imagem ao tamanho da tela
+
+        // Carrega os sprites
+        this.guerreiro = this.add.sprite(100, 100, 'guerreiro').setOrigin(0.5, 1);
+        this.clerigo = this.add.sprite(300, 100, 'clerigo').setOrigin(0.5, 1);
+        this.bardo = this.add.sprite(500, 100, 'bardo').setOrigin(0.5, 1); // Adiciona o bardo
+
+        // Define a escala para 76x76 pixels para guerreiros e clérigos
+        this.guerreiro.displayWidth = 76;
+        this.guerreiro.displayHeight = 76;
+        this.clerigo.displayWidth = 76;
+        this.clerigo.displayHeight = 76;
+
+        // Define a escala do bardo para 57x57 pixels
+        this.bardo.displayWidth = 57; 
+        this.bardo.displayHeight = 57;
+
+        this.guerreiro.setInteractive();
+        this.clerigo.setInteractive();
+        this.bardo.setInteractive(); // Torna o bardo interativo
+        this.input.setDraggable(this.guerreiro);
+        this.input.setDraggable(this.clerigo);
+        this.input.setDraggable(this.bardo); // Permite arrastar o bardo
+
+        this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+          const newX = dragX;
+          const newY = dragY;
+
+          if (newX > 0 && newX < this.sys.game.config.width && newY > 0 && newY < this.sys.game.config.height) {
+            gameObject.x = newX;
+            gameObject.y = newY;
+          }
+        });
+
+        this.input.on('dragend', (pointer, gameObject) => {
+          console.log(gameObject.texture.key + ' solto em:', gameObject.x, gameObject.y);
+        });
+
+        this.guerreiro.on('pointerdown', () => {
+          this.mudarDirecao(this.guerreiro);
+        });
+
+        this.input.keyboard.on('keydown-G', () => {
+          this.trocarTraje(this.guerreiro, 'guerreiro', 'guerreiro2');
+        });
+
+        this.clerigo.on('pointerdown', () => {
+          this.mudarDirecao(this.clerigo);
+        });
+
+        this.input.keyboard.on('keydown-C', () => {
+          this.trocarTraje(this.clerigo, 'clerigo', 'clerigo2');
+        });
+
+        this.bardo.on('pointerdown', () => {
+          this.mudarDirecao(this.bardo); // Permite mudar a direção do bardo
+        });
+      }
+
+      mudarDirecao(sprite) {
+        sprite.setScale(sprite.scaleX === 1 ? -1 : 1, 1);
+      }
+
+      trocarTraje(sprite, original, novo) {
+        const originalScaleX = sprite.scaleX;
+
+        if (sprite.texture.key === original) {
+          sprite.setTexture(novo);
+          sprite.setScale(originalScaleX, 1);
+
+          setTimeout(() => {
+            sprite.setTexture(original);
+            sprite.setScale(originalScaleX, 1);
+          }, 200);
+        }
+      }
+    }
+
+    const config = {
+      type: Phaser.AUTO,
+      width: 800,
+      height: 600,
+      scene: Guerreiro,
+      physics: {
+        default: 'arcade',
+        arcade: {
+          debug: false
+        }
+      }
+    };
+
+    const game = new Phaser.Game(config);
+  </script>
+</body>
+</html>
